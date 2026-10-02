@@ -4,17 +4,26 @@ import EtiquetaNivel from './EtiquetaNivel';
 import { colors, radius, spacing } from '../theme';
 import { formatearPrecio } from '../data/clases';
 
-export default function Card ({ clase, onPress }){
+export default function Card ({ clase, onPress, style }){
     return(
         <Pressable
             onPress={onPress}
-            style={styles.tarjeta}
+            style={[styles.tarjeta, style]}
         >
             <Image source={{ uri: clase.imagen }} style={styles.imagen} resizeMode="cover" />
             <View style={styles.cuerpo}>
                 <EtiquetaNivel nivel={clase.nivel}/>
                 <Text style={styles.titulo}>{clase.titulo}</Text>
-                <Text style={styles.profesor}>{clase.profesor.nombre}</Text>
+                
+                    <View style={styles.filaProfesor}>
+                        <Image source={{ uri: clase.profesor.foto }} style={styles.avatar} />
+                        <Text style={styles.profesor}>{clase.profesor.nombre}</Text>
+                    </View>
+
+                    <Text style={styles.meta}>Modalidad: {clase.modalidad}</Text>
+                    <Text style={styles.meta}>Horario: {clase.horarios[0]}</Text>
+                    <Text style={styles.meta}>Cupos: {clase.cupos}</Text>
+                    
                 <View style={styles.pie}>
                     <Text style={styles.meta}>{clase.duracion} min</Text>
                     <Text style={styles.precio}>{formatearPrecio(clase.precio)}</Text>
@@ -30,16 +39,17 @@ export default function Card ({ clase, onPress }){
             backgroundColor: colors.superficie,
             borderRadius: radius.lg,
             overflow: 'hidden',
-            marginBottom: spacing.lg,
   },
         imagen: {
             width: '100%',
-            height: 130,
+            height: 112,
             backgroundColor: colors.primarioSuave,
+            marginBottom: spacing.sm,
   },
         cuerpo: {
-            padding: spacing.lg,
-            gap: spacing.sm,
+            paddingHorizontal: spacing.lg,
+            paddingBottom: spacing.md,
+            gap: spacing.xs,
   },
         titulo: { fontSize: 16, fontWeight: '700', color: colors.texto },
         filaProfesor: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -55,4 +65,6 @@ export default function Card ({ clase, onPress }){
         meta: { fontSize: 12, color: colors.textoSuave },
         punto: { color: colors.borde, marginHorizontal: 2 },
         precio: { fontSize: 14, fontWeight: '800', color: colors.primario },
+        cargando: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.fondo },
+        cargandoTexto: { fontSize: 16, color: colors.texto, fontWeight: '600' },
 });

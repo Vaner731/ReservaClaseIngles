@@ -20,7 +20,7 @@ export default function DetallesClase({route, navigation}) {
       >
         <Image source={{ uri: clase.imagen }}
              resizeMode="cover"
-           styyle={[styles.portada, {height: esTablet ? 300 : 220}]}
+           style={[styles.portada, {height: esTablet ? 300 : 220}]}
         /> 
 
       </ScrollView>
