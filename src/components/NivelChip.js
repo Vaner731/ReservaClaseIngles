@@ -19,18 +19,20 @@ export default function NivelChip({etiqueta, activo, onPress}){
 
 const style = StyleSheet.create({
     chip: {
-        paddingVertical: spacing.sm,
+        minHeight: 48,
         paddingHorizontal: spacing.lg,
         borderRadius: radius.full,
         backgroundColor: colors.superficie,
         borderWidth: 1,
         borderColor: colors.borde,
         marginRight: spacing.sm,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     chipActivo: {
         backgroundColor: colors.primario,
         borderColor: colors.primario,
     },
-    texto: { fontSize: 13, fontWeight: '600', color: colors.textoSuave },
+    texto: { fontSize: 13, lineHeight: 18, fontWeight: '600', color: colors.textoSuave },
     textoActivo: { color: '#FFFFFF' },
 });
