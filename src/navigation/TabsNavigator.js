@@ -3,13 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import ClasesStack from './ClasesStack';
+import ProfileScreen from '../screens/ProfileScreen';
 import { colors } from '../theme';
 
 function ReservasPlaceholder() {
-  return null;
-}
-
-function PerfilPlaceholder() {
   return null;
 }
 
@@ -26,6 +23,7 @@ export default function TabsNavigator() {
           backgroundColor: colors.superficie,
           borderTopColor: colors.borde,
         },
+
         tabBarIcon: ({ color, size, focused }) => {
           let nombreIcono = 'home-outline';
 
@@ -69,7 +67,7 @@ export default function TabsNavigator() {
 
       <Tab.Screen
         name="Perfil"
-        component={PerfilPlaceholder}
+        component={ProfileScreen}
       />
     </Tab.Navigator>
   );
