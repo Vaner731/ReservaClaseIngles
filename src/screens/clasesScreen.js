@@ -32,7 +32,7 @@ export default function ClasesScreen({ navigation }) {
         listaRef.current?.scrollToOffset({ offset: 0, animated: false });
     }, [nivel, busqueda]);
 
-const styles = StyleSheet.create({
+const estilos = StyleSheet.create({
         pantalla: { flex: 1, backgroundColor: colors.fondo },
         encabezado: { paddingHorizontal, paddingBottom: spacing.md },
         filtros: {
@@ -68,21 +68,21 @@ const styles = StyleSheet.create({
     });
 
     return (
-        <View style={[styles.pantalla, { paddingTop: insets.top + spacing.md }]}>
-            <View style={styles.encabezado}>
+        <View style={[estilos.pantalla, { paddingTop: insets.top + spacing.md }]}>
+            <View style={estilos.encabezado}>
                                 <Text
                                     style={[
                                         typography.titulo,
-                                        styles.tituloResponsive,
-                                        width < 420 && styles.tituloMovil,
+                                        estilos.tituloResponsive,
+                                        width < 420 && estilos.tituloMovil,
                                     ]}
                                 >
                                     Aplicacion para clases de ingles
                                 </Text>
-                <View style={styles.buscador}>
+                <View style={estilos.buscador}>
                     <Ionicons name="search" size={20} color={colors.textoSuave} />
                     <TextInput
-                        style={styles.input}
+                        style={estilos.input}
                         placeholder="Buscar por nivel o profesor"
                         placeholderTextColor={colors.textoSuave}
                         value={busqueda}
@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={styles.filtros}
-                contentContainerStyle={styles.filtrosContenido}
+                style={estilos.filtros}
+                contentContainerStyle={estilos.filtrosContenido}
             >
                 {NIVELES.map((item) => (
                     <NivelChip
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
             </ScrollView>
             <FlatList
                 ref={listaRef}
-                style={styles.listaClases}
+                style={estilos.listaClases}
                 data={resultados}
                 keyExtractor={(item) => item.id}
                 horizontal

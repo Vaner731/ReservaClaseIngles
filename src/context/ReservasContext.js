@@ -1,10 +1,22 @@
-import {useContext} from 'react';
-import {ReservasContext} from '../context/ReservasContext';
+import React, { createContext, useState } from 'react';
 
-export default function useReserva() {
-    const context = useContext(ReservasContext);
-    if (!context) {
-        throw new Error('useReserva debe de usarse dentroo de <ReservasProvider>');
-    }
-    return context;
-};
+export const ReservasContext = createContext(null);
+
+export function ReservasProvider({ children }) {
+    const [reservas, setReservas] = useState([]);
+
+    const reservar = (clase, horario) => {
+        setReservas((actuales) => {
+            if (actuales.some((reserva) => reserva.claseId === clase.id)) return actuales;
+            return [...actuales, { claseId: clase.id, claseTitulo: clase.titulo, horario }];
+        });
+    };
+
+    const obtenerReserva = (claseId) => reservas.find((reserva) => reserva.claseId === claseId);
+
+    return (
+        <ReservasContext.Provider value={{ reservar, obtenerReserva }}>
+            {children}
+        </ReservasContext.Provider>
+    );
+}
