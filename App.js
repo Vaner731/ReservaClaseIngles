@@ -1,11 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {
-  NavigationContainer,
-  DefaultTheme,
-} from '@react-navigation/native';
+import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
 import TabsNavigator from './src/navigation/TabsNavigator';
 import { colors } from './src/theme';
 import { ReservasProvider } from './src/context/ReservasContext';

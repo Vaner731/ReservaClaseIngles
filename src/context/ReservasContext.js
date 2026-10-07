@@ -1,22 +1,76 @@
-import React, { createContext, useState } from 'react';
+import React, {createContext, useCallback} from 'react';
+import useAlmacenamiento from '../hooks/useAlmacenamiento';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 
 export const ReservasContext = createContext(null);
 
 export function ReservasProvider({ children }) {
-    const [reservas, setReservas] = useState([]);
+ const [reservas, actualizarReservas, cargandoReservas] =
+  useAlmacenamiento(STORAGE_KEYS.RESERVAS, []);
 
-    const reservar = (clase, horario) => {
-        setReservas((actuales) => {
-            if (actuales.some((reserva) => reserva.claseId === clase.id)) return actuales;
-            return [...actuales, { claseId: clase.id, claseTitulo: clase.titulo, horario }];
-        });
-    };
+  const reservar = useCallback(
+    async (clase, horario) => {
+      if (!clase || !clase.id) {
+        return false;
+      }
 
-    const obtenerReserva = (claseId) => reservas.find((reserva) => reserva.claseId === claseId);
+      if (!horario) {
+        return false;
+      }
 
-    return (
-        <ReservasContext.Provider value={{ reservar, obtenerReserva }}>
-            {children}
-        </ReservasContext.Provider>
-    );
+      const actuales = Array.isArray(reservas)
+        ? reservas
+        : [];
+
+      const yaExiste = actuales.some(
+        (reserva) =>
+          reserva.claseId === clase.id
+      );
+
+      if (yaExiste) {
+        return false;
+      }
+
+      const nuevaReserva = {
+        claseId: clase.id,
+        claseTitulo: clase.titulo,
+        horario,
+      };
+
+      await actualizarReservas([
+        ...actuales,
+        nuevaReserva,
+      ]);
+
+      return true;
+    },
+    [reservas, actualizarReservas]
+  );
+
+  const obtenerReserva = useCallback(
+    (claseId) => {
+      const actuales = Array.isArray(reservas)
+        ? reservas
+        : [];
+
+      return actuales.find(
+        (reserva) =>
+          reserva.claseId === claseId
+      );
+    },
+    [reservas]
+  );
+
+  return (
+    <ReservasContext.Provider
+      value={{
+        reservas,
+        reservar,
+        obtenerReserva,
+        cargandoReservas,
+      }}
+    >
+      {children}
+    </ReservasContext.Provider>
+  );
 }

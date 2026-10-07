@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import useAlmacenamiento from '../hooks/useAlmacenamiento';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 import { colors, radius, spacing, typography } from '../theme';
 
 const PERFIL_INICIAL = {
@@ -17,7 +18,15 @@ const PERFIL_INICIAL = {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
 
-  const [perfil, setPerfil] = useState(null);
+  const [
+    perfil,
+    guardarPerfilStorage,
+    cargandoPerfil,
+  ] = useAlmacenamiento(
+    STORAGE_KEYS.PERFIL,
+    null
+  );
+
   const [formulario, setFormulario] = useState(PERFIL_INICIAL);
 
   const actualizarCampo = (campo, valor) => {
@@ -49,8 +58,20 @@ export default function ProfileScreen() {
       return;
     }
 
-    setPerfil(datos);
+    guardarPerfilStorage(datos);
   };
+
+  if (cargandoPerfil) {
+    return (
+      <View style={styles.pantalla}>
+        <View style={styles.cargando}>
+          <Text style={styles.cargandoTexto}>
+            Cargando perfil...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   if (perfil) {
     return (
@@ -285,6 +306,18 @@ const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: colors.fondo,
+  },
+
+  cargando: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  cargandoTexto: {
+    color: colors.texto,
+    fontSize: 16,
+    fontWeight: '600',
   },
 
   contenido: {
