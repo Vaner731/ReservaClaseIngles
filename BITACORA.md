@@ -117,3 +117,27 @@
 **Resultado:** La pestaña Reservas queda conectada a una pantalla de consulta y el detalle de clase incorpora las validaciones y mensajes del flujo de reserva.
 
 **Commit sugerido para que lo realice la estudiante:** `feat: implementar pantalla y flujo de reservas`
+
+## Commit 5 solicitado por la docente: gestionar reservas y horarios ocupados
+
+**Fecha:** 2026-10-08
+**Módulo:** Gestión de reservas
+
+**Objetivo:** Completar la gestión de las reservas guardadas, permitiendo eliminarlas y evitando que se vuelva a reservar un horario que ya está ocupado.
+
+**Archivos modificados:**
+- `src/context/ReservasContext.js`
+- `src/screens/ReservasScreen.js`
+- `src/screens/DetallesClaseScreen.js`
+
+**Cambios realizados:**
+- `ReservasContext.js` incorpora `eliminarReserva`, que actualiza el almacenamiento quitando la reserva correspondiente a una clase y un horario, y expone esta operación en el contexto.
+- La función `reservar` comprueba si el horario ya está ocupado antes de guardar una nueva reserva.
+- `ReservasScreen.js` agrega una acción para eliminar cada reserva y conserva los estados de carga y de lista vacía.
+- `DetallesClaseScreen.js` identifica los horarios que ya aparecen reservados, los muestra como ocupados y deshabilita su selección y la acción de reservar cuando corresponde. También valida que se haya seleccionado un horario y que exista un perfil registrado antes de continuar con la reserva.
+
+**Validación:** Se revisaron los cambios locales de los tres archivos indicados. No se ejecutaron pruebas automatizadas en esta actualización documental.
+
+**Resultado:** La pantalla de Reservas permite retirar reservas guardadas y el detalle de clase impide seleccionar o intentar reservar horarios que ya están ocupados.
+
+**Commit sugerido:** `feat: gestionar eliminación de reservas y horarios ocupados`

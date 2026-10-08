@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {Alert, View, Text, Pressable, StyleSheet, ScrollView, Image} from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useResponsive from '../hooks/useResponsive';
@@ -18,14 +18,16 @@ export default function DetallesClaseScreen({ route, navigation }) {
 
   const [horarioSeleccionado, setHorarioSeleccionado] = useState(null);
 
-  const { reservar, obtenerReserva } = useReserva();
-  const reserva = obtenerReserva(clase.id);
+  const { reservar, reservas } = useReserva();
+
+  const horariosReservados = Array.isArray(reservas)
+    ? reservas
+    : [];
 
   const manejarReserva = async () => {
     if (!horarioSeleccionado) {
-      Alert.alert(
-        'Horario requerido',
-        'Debe seleccionar un horario antes de reservar.'
+      console.log(
+        'Reserva no realizada: debe seleccionar un horario.'
       );
       return;
     }
@@ -36,17 +38,28 @@ export default function DetallesClaseScreen({ route, navigation }) {
     );
 
     if (!perfil) {
-      Alert.alert(
-        'Perfil requerido',
-        'Debe registrar su perfil antes de realizar una reserva.'
+      console.log(
+        'No existe un perfil registrado. Abriendo Perfil.'
       );
+
+      navigation
+        .getParent()
+        ?.navigate('Perfil');
+
       return;
     }
 
-    if (reserva) {
-      Alert.alert(
-        'Reserva existente',
-        'Esta clase ya está reservada.'
+    const horarioReservado =
+      horariosReservados.some(
+        (reserva) =>
+          reserva.horario ===
+          horarioSeleccionado
+      );
+
+    if (horarioReservado) {
+      console.log(
+        'Reserva no realizada: el horario ya está reservado.',
+        horarioSeleccionado
       );
       return;
     }
@@ -57,17 +70,19 @@ export default function DetallesClaseScreen({ route, navigation }) {
     );
 
     if (!resultado) {
-      Alert.alert(
-        'Reserva no realizada',
-        'Esta clase ya está reservada.'
+      console.log(
+        'Reserva no realizada: el horario ya está reservado.'
       );
       return;
     }
 
-    Alert.alert(
-      'Reserva realizada',
-      'La clase fue reservada correctamente.'
+    console.log(
+      'Reserva realizada correctamente:',
+      clase.titulo,
+      horarioSeleccionado
     );
+
+    setHorarioSeleccionado(null);
   };
 
   return (
@@ -187,13 +202,21 @@ export default function DetallesClaseScreen({ route, navigation }) {
               const seleccionado =
                 horarioSeleccionado === horario;
 
+              const reservado =
+                horariosReservados.some(
+                  (reserva) =>
+                    reserva.horario === horario
+                );
+
               return (
                 <Pressable
                   key={horario}
                   accessibilityRole="button"
                   accessibilityState={{
                     selected: seleccionado,
+                    disabled: reservado,
                   }}
+                  disabled={reservado}
                   onPress={() =>
                     setHorarioSeleccionado(horario)
                   }
@@ -201,17 +224,23 @@ export default function DetallesClaseScreen({ route, navigation }) {
                     estilos.horario,
                     seleccionado &&
                       estilos.horarioSeleccionado,
+                    reservado &&
+                      estilos.horarioReservado,
                   ]}
                 >
                   <Ionicons
                     name={
-                      seleccionado
+                      reservado
+                        ? 'checkmark-circle'
+                        : seleccionado
                         ? 'radio-button-on'
                         : 'radio-button-off'
                     }
                     size={20}
                     color={
-                      seleccionado
+                      reservado
+                        ? colors.exito
+                        : seleccionado
                         ? colors.primario
                         : colors.textoSuave
                     }
@@ -222,10 +251,22 @@ export default function DetallesClaseScreen({ route, navigation }) {
                       estilos.textoHorario,
                       seleccionado &&
                         estilos.textoHorarioSeleccionado,
+                      reservado &&
+                        estilos.textoHorarioReservado,
                     ]}
                   >
                     {horario}
                   </Text>
+
+                  {reservado && (
+                    <Text
+                      style={
+                        estilos.textoReservado
+                      }
+                    >
+                      Reservado
+                    </Text>
+                  )}
                 </Pressable>
               );
             })}
@@ -256,37 +297,58 @@ export default function DetallesClaseScreen({ route, navigation }) {
           accessibilityRole="button"
           accessibilityState={{
             disabled:
-              Boolean(reserva) ||
-              !horarioSeleccionado,
+              !horarioSeleccionado ||
+              horariosReservados.some(
+                (reserva) =>
+                  reserva.horario ===
+                  horarioSeleccionado
+              ),
           }}
           disabled={
-            Boolean(reserva) ||
-            !horarioSeleccionado
+            !horarioSeleccionado ||
+            horariosReservados.some(
+              (reserva) =>
+                reserva.horario ===
+                horarioSeleccionado
+            )
           }
           onPress={manejarReserva}
           style={({ pressed }) => [
             estilos.botonReserva,
 
-            (!horarioSeleccionado || reserva) &&
+            (!horarioSeleccionado ||
+              horariosReservados.some(
+                (reserva) =>
+                  reserva.horario ===
+                  horarioSeleccionado
+              )) &&
               estilos.botonDeshabilitado,
 
             pressed &&
               horarioSeleccionado &&
-              !reserva &&
+              !horariosReservados.some(
+                (reserva) =>
+                  reserva.horario ===
+                  horarioSeleccionado
+              ) &&
               estilos.botonPresionado,
           ]}
         >
           <Text style={estilos.textoBoton}>
-            {reserva
-              ? 'Clase reservada'
-              : horarioSeleccionado
-              ? 'Reservar clase'
+            {horarioSeleccionado
+              ? horariosReservados.some(
+                  (reserva) =>
+                    reserva.horario ===
+                    horarioSeleccionado
+                )
+                ? 'Horario reservado'
+                : 'Reservar clase'
               : 'Elige un horario'}
           </Text>
         </Pressable>
       </View>
     </View>
-    );
+  );
 }
 
 const estilos = StyleSheet.create({
@@ -315,7 +377,7 @@ const estilos = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.md,
   },
-                
+
   datos: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -388,14 +450,31 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.primarioSuave,
   },
 
+  horarioReservado: {
+    opacity: 0.65,
+    backgroundColor: colors.fondo,
+  },
+
   textoHorario: {
     ...typography.cuerpo,
     color: colors.texto,
+    flex: 1,
   },
 
   textoHorarioSeleccionado: {
     color: colors.primarioOscuro,
     fontWeight: '700',
+  },
+
+  textoHorarioReservado: {
+    color: colors.textoSuave,
+    fontWeight: '700',
+  },
+
+  textoReservado: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.exito,
   },
 
   barra: {
