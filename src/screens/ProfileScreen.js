@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import {View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert} from 'react-native';
+import {
+  View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useAlmacenamiento from '../hooks/useAlmacenamiento';
@@ -18,16 +19,11 @@ const PERFIL_INICIAL = {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
 
-  const [
-    perfil,
-    guardarPerfilStorage,
-    cargandoPerfil,
-  ] = useAlmacenamiento(
-    STORAGE_KEYS.PERFIL,
-    null
-  );
+  const [perfil, guardarPerfilStorage, cargandoPerfil] =
+    useAlmacenamiento(STORAGE_KEYS.PERFIL, null);
 
   const [formulario, setFormulario] = useState(PERFIL_INICIAL);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   const actualizarCampo = (campo, valor) => {
     setFormulario((actual) => ({
@@ -36,7 +32,7 @@ export default function ProfileScreen() {
     }));
   };
 
-  const guardarPerfil = () => {
+  const guardarPerfil = async () => {
     const datos = {
       nombre: formulario.nombre.trim(),
       apellido: formulario.apellido.trim(),
@@ -51,6 +47,10 @@ export default function ProfileScreen() {
     );
 
     if (camposVacios) {
+      console.log(
+        'Registro rechazado: hay campos vacíos.'
+      );
+
       Alert.alert(
         'Perfil incompleto',
         'Debe completar todos los campos.'
@@ -58,222 +58,281 @@ export default function ProfileScreen() {
       return;
     }
 
-    guardarPerfilStorage(datos);
+    // Evitar registrar exactamente los mismos datos.
+    if (
+      perfil &&
+      Object.keys(datos).every(
+        (campo) => datos[campo] === perfil[campo]
+      )
+    ) {
+      console.log(
+        'Registro rechazado: este usuario ya está registrado.'
+      );
+
+      Alert.alert(
+        'Usuario ya registrado',
+        'Los datos ingresados son iguales a los del perfil guardado.'
+      );
+      return;
+    }
+
+    try {
+      await guardarPerfilStorage(datos);
+
+      console.log(
+        'Perfil guardado correctamente:',
+        datos
+      );
+
+      setFormulario(PERFIL_INICIAL);
+      setMostrarFormulario(false);
+
+      Alert.alert(
+        'Registro exitoso',
+        'El perfil se guardó correctamente.'
+      );
+    } catch (error) {
+      console.log(
+        'Error al guardar el perfil:',
+        error
+      );
+
+      Alert.alert(
+        'Error',
+        'No fue posible guardar el perfil.'
+      );
+    }
+  };
+
+  const registrarOtroUsuario = () => {
+    console.log(
+      'Se abrió el formulario para registrar otro usuario.'
+    );
+
+    setFormulario(PERFIL_INICIAL);
+    setMostrarFormulario(true);
+  };
+
+  const cancelarRegistro = () => {
+    console.log('Se canceló el registro del usuario.');
+
+    setFormulario(PERFIL_INICIAL);
+    setMostrarFormulario(false);
   };
 
   if (cargandoPerfil) {
     return (
-      <View style={styles.pantalla}>
-        <View style={styles.cargando}>
-          <Text style={styles.cargandoTexto}>
-            Cargando perfil...
-          </Text>
-        </View>
+      <View
+        style={[
+          styles.cargando,
+          { paddingTop: insets.top },
+        ]}
+      >
+        <Text style={styles.cargandoTexto}>
+          Cargando perfil...
+        </Text>
       </View>
     );
   }
 
-  if (perfil) {
+  // Mostrar los datos del perfil guardado.
+  if (perfil && !mostrarFormulario) {
     return (
-      <View
-        style={[
-          styles.pantalla,
+      <ScrollView
+        style={styles.pantalla}
+        contentContainerStyle={[
+          styles.contenido,
           {
             paddingTop: insets.top + spacing.lg,
+            paddingBottom: insets.bottom + spacing.xxl,
           },
         ]}
       >
-        <ScrollView
-          contentContainerStyle={styles.contenido}
-          showsVerticalScrollIndicator={false}
+        <View style={styles.encabezado}>
+          <Ionicons
+            name="person-circle-outline"
+            size={64}
+            color={colors.primario}
+          />
+
+          <Text style={styles.titulo}>
+            Mi perfil
+          </Text>
+
+          <Text style={styles.subtitulo}>
+            Estos son los datos del usuario registrado.
+          </Text>
+        </View>
+
+        <View style={styles.tarjeta}>
+          <DatoPerfil
+            etiqueta="Nombre"
+            valor={perfil.nombre}
+          />
+
+          <DatoPerfil
+            etiqueta="Apellido"
+            valor={perfil.apellido}
+          />
+
+          <DatoPerfil
+            etiqueta="Teléfono"
+            valor={perfil.telefono}
+          />
+
+          <DatoPerfil
+            etiqueta="Correo electrónico"
+            valor={perfil.correo}
+          />
+
+          <DatoPerfil
+            etiqueta="Cédula"
+            valor={perfil.cc}
+          />
+
+          <DatoPerfil
+            etiqueta="Nivel de inglés"
+            valor={perfil.nivelIngles}
+          />
+        </View>
+
+        <Pressable
+          style={styles.botonPrincipal}
+          onPress={registrarOtroUsuario}
         >
-          <View style={styles.encabezado}>
-            <View style={styles.iconoEncabezado}>
-              <Ionicons
-                name="person"
-                size={28}
-                color={colors.primario}
-              />
-            </View>
+          <Ionicons
+            name="person-add-outline"
+            size={20}
+            color="#FFFFFF"
+          />
 
-            <View style={styles.encabezadoTexto}>
-              <Text style={typography.titulo}>
-                Mi Perfil
-              </Text>
-
-              <Text style={typography.secundario}>
-                Información del estudiante
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.tarjeta}>
-            <View style={styles.fila}>
-              <Text style={styles.etiqueta}>Nombre</Text>
-              <Text style={styles.valor}>{perfil.nombre}</Text>
-            </View>
-
-            <View style={styles.fila}>
-              <Text style={styles.etiqueta}>Apellido</Text>
-              <Text style={styles.valor}>{perfil.apellido}</Text>
-            </View>
-
-            <View style={styles.fila}>
-              <Text style={styles.etiqueta}>Teléfono</Text>
-              <Text style={styles.valor}>{perfil.telefono}</Text>
-            </View>
-
-            <View style={styles.fila}>
-              <Text style={styles.etiqueta}>Correo</Text>
-              <Text style={styles.valor}>{perfil.correo}</Text>
-            </View>
-
-            <View style={styles.fila}>
-              <Text style={styles.etiqueta}>CC</Text>
-              <Text style={styles.valor}>{perfil.cc}</Text>
-            </View>
-
-            <View style={styles.fila}>
-              <Text style={styles.etiqueta}>
-                Nivel de inglés
-              </Text>
-
-              <Text style={styles.valor}>
-                {perfil.nivelIngles}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.aviso}>
-            <Ionicons
-              name="checkmark-circle"
-              size={22}
-              color={colors.exito}
-            />
-
-            <Text style={styles.avisoTexto}>
-              Tu perfil ya está registrado. El formulario de
-              registro está desactivado.
-            </Text>
-          </View>
-        </ScrollView>
-      </View>
+          <Text style={styles.textoBotonPrincipal}>
+            Registrar otro usuario
+          </Text>
+        </Pressable>
+      </ScrollView>
     );
   }
 
+  // Mostrar el formulario para el primer registro
+  // o para intentar registrar otro usuario.
   return (
-    <View
-      style={[
-        styles.pantalla,
+    <ScrollView
+      style={styles.pantalla}
+      contentContainerStyle={[
+        styles.contenido,
         {
           paddingTop: insets.top + spacing.lg,
+          paddingBottom: insets.bottom + spacing.xxl,
         },
       ]}
+      keyboardShouldPersistTaps="handled"
     >
-      <ScrollView
-        contentContainerStyle={styles.contenido}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.encabezado}>
-          <View style={styles.iconoEncabezado}>
-            <Ionicons
-              name="person-outline"
-              size={28}
-              color={colors.primario}
-            />
-          </View>
+      <View style={styles.encabezado}>
+        <Ionicons
+          name="person-circle-outline"
+          size={64}
+          color={colors.primario}
+        />
 
-          <View style={styles.encabezadoTexto}>
-            <Text style={typography.titulo}>
-              Mi Perfil
-            </Text>
+        <Text style={styles.titulo}>
+          {perfil ? 'Registrar otro usuario' : 'Crear perfil'}
+        </Text>
 
-            <Text style={typography.secundario}>
-              Registra tus datos para reservar clases
-            </Text>
-          </View>
-        </View>
+        <Text style={styles.subtitulo}>
+          Complete todos los campos para guardar el perfil.
+        </Text>
+      </View>
 
-        <View style={styles.formulario}>
-          <Campo
-            etiqueta="Nombre"
-            valor={formulario.nombre}
-            onChangeText={(valor) =>
-              actualizarCampo('nombre', valor)
-            }
-            placeholder="Ingresa tu nombre"
+      <View style={styles.tarjeta}>
+        <Campo
+          etiqueta="Nombre"
+          valor={formulario.nombre}
+          onChangeText={(valor) =>
+            actualizarCampo('nombre', valor)
+          }
+          placeholder="Ingrese su nombre"
+          autoCapitalize="words"
+        />
+
+        <Campo
+          etiqueta="Apellido"
+          valor={formulario.apellido}
+          onChangeText={(valor) =>
+            actualizarCampo('apellido', valor)
+          }
+          placeholder="Ingrese su apellido"
+          autoCapitalize="words"
+        />
+
+        <Campo
+          etiqueta="Teléfono"
+          valor={formulario.telefono}
+          onChangeText={(valor) =>
+            actualizarCampo('telefono', valor)
+          }
+          placeholder="Ingrese su teléfono"
+          keyboardType="phone-pad"
+        />
+
+        <Campo
+          etiqueta="Correo electrónico"
+          valor={formulario.correo}
+          onChangeText={(valor) =>
+            actualizarCampo('correo', valor)
+          }
+          placeholder="Ingrese su correo"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Campo
+          etiqueta="Cédula"
+          valor={formulario.cc}
+          onChangeText={(valor) =>
+            actualizarCampo('cc', valor)
+          }
+          placeholder="Ingrese su cédula"
+          keyboardType="numeric"
+        />
+
+        <Campo
+          etiqueta="Nivel de inglés"
+          valor={formulario.nivelIngles}
+          onChangeText={(valor) =>
+            actualizarCampo('nivelIngles', valor)
+          }
+          placeholder="Ej. A1, A2, B1, B2"
+          autoCapitalize="characters"
+        />
+
+        <Pressable
+          style={styles.botonPrincipal}
+          onPress={guardarPerfil}
+        >
+          <Ionicons
+            name="save-outline"
+            size={20}
+            color="#FFFFFF"
           />
 
-          <Campo
-            etiqueta="Apellido"
-            valor={formulario.apellido}
-            onChangeText={(valor) =>
-              actualizarCampo('apellido', valor)
-            }
-            placeholder="Ingresa tu apellido"
-          />
+          <Text style={styles.textoBotonPrincipal}>
+            Guardar perfil
+          </Text>
+        </Pressable>
 
-          <Campo
-            etiqueta="Teléfono"
-            valor={formulario.telefono}
-            onChangeText={(valor) =>
-              actualizarCampo('telefono', valor)
-            }
-            placeholder="Ingresa tu teléfono"
-            keyboardType="phone-pad"
-          />
-
-          <Campo
-            etiqueta="Correo"
-            valor={formulario.correo}
-            onChangeText={(valor) =>
-              actualizarCampo('correo', valor)
-            }
-            placeholder="Ingresa tu correo"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          <Campo
-            etiqueta="CC"
-            valor={formulario.cc}
-            onChangeText={(valor) =>
-              actualizarCampo('cc', valor)
-            }
-            placeholder="Ingresa tu número de documento"
-            keyboardType="numeric"
-          />
-
-          <Campo
-            etiqueta="Nivel de inglés"
-            valor={formulario.nivelIngles}
-            onChangeText={(valor) =>
-              actualizarCampo('nivelIngles', valor)
-            }
-            placeholder="Ej. Básico, Intermedio, Avanzado"
-          />
-
+        {perfil && (
           <Pressable
-            onPress={guardarPerfil}
-            style={({ pressed }) => [
-              styles.boton,
-              pressed && styles.botonPresionado,
-            ]}
+            style={styles.botonSecundario}
+            onPress={cancelarRegistro}
           >
-            <Ionicons
-              name="save-outline"
-              size={20}
-              color={colors.superficie}
-            />
-
-            <Text style={styles.textoBoton}>
-              Guardar perfil
+            <Text style={styles.textoBotonSecundario}>
+              Cancelar
             </Text>
           </Pressable>
-        </View>
-      </ScrollView>
-    </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -282,22 +341,38 @@ function Campo({
   valor,
   onChangeText,
   placeholder,
-  keyboardType,
-  autoCapitalize,
+  keyboardType = 'default',
+  autoCapitalize = 'sentences',
 }) {
   return (
     <View style={styles.campo}>
-      <Text style={styles.label}>{etiqueta}</Text>
+      <Text style={styles.etiqueta}>
+        {etiqueta}
+      </Text>
 
       <TextInput
         style={styles.input}
         value={valor}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={colors.textoSuave}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
+        placeholderTextColor={colors.textoSecundario}
       />
+    </View>
+  );
+}
+
+function DatoPerfil({ etiqueta, valor }) {
+  return (
+    <View style={styles.dato}>
+      <Text style={styles.etiquetaDato}>
+        {etiqueta}
+      </Text>
+
+      <Text style={styles.valorDato}>
+        {valor || 'No registrado'}
+      </Text>
     </View>
   );
 }
@@ -308,128 +383,120 @@ const styles = StyleSheet.create({
     backgroundColor: colors.fondo,
   },
 
-  cargando: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cargandoTexto: {
-    color: colors.texto,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
   contenido: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
   },
 
   encabezado: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.xl,
-    gap: spacing.md,
   },
 
-  iconoEncabezado: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.primarioSuave,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  encabezadoTexto: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-
-  formulario: {
-    gap: spacing.md,
-  },
-
-  campo: {
-    gap: spacing.xs,
-  },
-
-  label: {
-    fontSize: 14,
-    fontWeight: '700',
+  titulo: {
+    ...typography.titulo,
     color: colors.texto,
-  },
-
-  input: {
-    minHeight: 50,
-    borderWidth: 1,
-    borderColor: colors.borde,
-    borderRadius: radius.md,
-    backgroundColor: colors.superficie,
-    paddingHorizontal: spacing.md,
-    fontSize: 15,
-    color: colors.texto,
-  },
-
-  boton: {
-    minHeight: 50,
+    textAlign: 'center',
     marginTop: spacing.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.primario,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
   },
 
-  botonPresionado: {
-    backgroundColor: colors.primarioOscuro,
-  },
-
-  textoBoton: {
-    color: colors.superficie,
-    fontSize: 15,
-    fontWeight: '700',
+  subtitulo: {
+    ...typography.texto,
+    color: colors.textoSecundario,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
 
   tarjeta: {
     backgroundColor: colors.superficie,
     borderRadius: radius.lg,
     padding: spacing.lg,
-    gap: spacing.lg,
+    marginBottom: spacing.lg,
   },
 
-  fila: {
-    gap: spacing.xs,
+  campo: {
+    marginBottom: spacing.md,
   },
 
   etiqueta: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textoSuave,
+    ...typography.texto,
+    color: colors.texto,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
   },
 
-  valor: {
+  input: {
+    borderWidth: 1,
+    borderColor: colors.borde,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    color: colors.texto,
+    backgroundColor: colors.fondo,
     fontSize: 16,
+  },
+
+  dato: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borde,
+  },
+
+  etiquetaDato: {
+    ...typography.texto,
+    color: colors.textoSecundario,
+    marginBottom: spacing.xs,
+  },
+
+  valorDato: {
+    ...typography.texto,
     color: colors.texto,
     fontWeight: '600',
   },
 
-  aviso: {
+  botonPrincipal: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.sm,
-    marginTop: spacing.lg,
-    padding: spacing.md,
-    backgroundColor: colors.superficie,
+    backgroundColor: colors.primario,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.borde,
+    padding: spacing.md,
+    marginTop: spacing.sm,
   },
 
-  avisoTexto: {
+  textoBotonPrincipal: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  botonSecundario: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.borde,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginTop: spacing.md,
+  },
+
+  textoBotonSecundario: {
+    color: colors.texto,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  cargando: {
     flex: 1,
-    color: colors.textoSuave,
-    lineHeight: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.fondo,
+  },
+
+  cargandoTexto: {
+    fontSize: 16,
+    color: colors.texto,
+    fontWeight: '600',
   },
 });

@@ -141,3 +141,26 @@
 **Resultado:** La pantalla de Reservas permite retirar reservas guardadas y el detalle de clase impide seleccionar o intentar reservar horarios que ya están ocupados.
 
 **Commit sugerido:** `feat: gestionar eliminación de reservas y horarios ocupados`
+
+## Commit 6 sugerido: actualizar el flujo de registro del perfil
+
+**Fecha:** 2026-10-08
+**Módulo:** Perfil del estudiante
+
+**Objetivo:** Completar la experiencia de registro del perfil, permitiendo consultar el perfil guardado y gestionar el registro de otro usuario.
+
+**Archivo modificado:**
+- `src/screens/ProfileScreen.js`
+
+**Cambios realizados:**
+- El guardado del perfil ahora espera la operación de almacenamiento y presenta alertas de éxito o error según el resultado.
+- Se valida que todos los campos estén completos y se evita guardar de nuevo exactamente los mismos datos del perfil existente.
+- Cuando hay un perfil guardado, la pantalla muestra sus datos y ofrece la opción de abrir un formulario para registrar otro usuario.
+- El formulario para un nuevo registro puede cancelarse; al guardar o cancelar se limpian los campos y se cierra el formulario.
+- Se conserva el indicador de carga mientras se recupera el perfil almacenado.
+
+**Validación:** Se revisaron los cambios locales de `ProfileScreen.js`. No se ejecutaron pruebas automatizadas en esta actualización documental.
+
+**Resultado:** El perfil conserva su persistencia local y la pantalla permite consultar los datos guardados, validar nuevos registros y gestionar el inicio o la cancelación del registro de otro usuario.
+
+**Commit sugerido:** `feat: mejorar registro de perfil y manejo de usuarios`
