@@ -4,11 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 import ClasesStack from './ClasesStack';
 import ProfileScreen from '../screens/ProfileScreen';
-import { colors } from '../theme';
+import ReservasScreen from '../screens/ReservasScreen';
 
-function ReservasPlaceholder() {
-  return null;
-}
+import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,15 +15,33 @@ export default function TabsNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.primario,
-        tabBarInactiveTintColor: colors.textoSuave,
+
+        tabBarActiveTintColor:
+          colors.primario,
+
+        tabBarInactiveTintColor:
+          colors.textoSuave,
+
         tabBarStyle: {
-          backgroundColor: colors.superficie,
-          borderTopColor: colors.borde,
+          backgroundColor:
+            colors.superficie,
+          borderTopColor:
+            colors.borde,
         },
 
-        tabBarIcon: ({ color, size, focused }) => {
-          let nombreIcono = 'home-outline';
+        tabBarIcon: ({
+          color,
+          size,
+          focused,
+        }) => {
+          let nombreIcono =
+            'home-outline';
+
+          if (route.name === 'Inicio') {
+            nombreIcono = focused
+              ? 'home'
+              : 'home-outline';
+          }
 
           if (route.name === 'Reservas') {
             nombreIcono = focused
@@ -37,12 +53,6 @@ export default function TabsNavigator() {
             nombreIcono = focused
               ? 'person'
               : 'person-outline';
-          }
-
-          if (route.name === 'Inicio') {
-            nombreIcono = focused
-              ? 'home'
-              : 'home-outline';
           }
 
           return (
@@ -62,7 +72,7 @@ export default function TabsNavigator() {
 
       <Tab.Screen
         name="Reservas"
-        component={ReservasPlaceholder}
+        component={ReservasScreen}
       />
 
       <Tab.Screen

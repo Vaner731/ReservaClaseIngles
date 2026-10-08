@@ -92,3 +92,28 @@
 - `App.js` también presenta un cambio de formato en la importación de navegación; no cambia su comportamiento.
 
 **Resultado:** El perfil y las reservas quedaron conectados al almacenamiento local; la pantalla de Perfil muestra un estado de carga mientras recupera los datos. Esta actualización fue documental: no se modificó código funcional ni se ejecutaron pruebas.
+
+## Commit 4 sugerido por la docente: implementar consulta y flujo de reservas
+
+**Fecha:** 2026-10-07
+**Módulo:** Reservas y detalle de clases
+
+**Objetivo:** Permitir que el estudiante consulte sus reservas desde la navegación principal y complete el flujo de reserva desde el detalle de una clase.
+
+**Archivos creados o modificados:**
+- Creado `src/screens/ReservasScreen.js`.
+- Modificado `src/navigation/TabsNavigator.js`.
+- Modificado `src/screens/DetallesClaseScreen.js`.
+
+**Cambios realizados:**
+- `ReservasScreen.js` presenta las reservas guardadas con el nombre de la clase, el horario y el estado de confirmación. También contempla la carga de datos y una vista informativa cuando todavía no hay reservas.
+- `TabsNavigator.js` reemplaza el contenido vacío de la pestaña Reservas por `ReservasScreen`, manteniendo las pestañas Inicio y Perfil y sus iconos.
+- `DetallesClaseScreen.js` permite seleccionar un horario y evita iniciar la reserva si no se ha elegido uno.
+- Antes de confirmar, el detalle verifica que exista un perfil guardado. Si falta, informa al estudiante que debe registrarlo primero.
+- Al intentar reservar, se comprueba si la clase ya tiene una reserva; la pantalla informa si la operación se realizó o si no pudo completarse.
+
+**Validación:** Se revisó la integración entre la pantalla de reservas, la navegación por pestañas y el contexto de reservas. No se completó la exportación de Expo ni se ejecutaron pruebas automatizadas en esta actualización documental.
+
+**Resultado:** La pestaña Reservas queda conectada a una pantalla de consulta y el detalle de clase incorpora las validaciones y mensajes del flujo de reserva.
+
+**Commit sugerido para que lo realice la estudiante:** `feat: implementar pantalla y flujo de reservas`
